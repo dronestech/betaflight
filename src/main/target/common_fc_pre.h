@@ -28,6 +28,9 @@
 //#define SCHEDULER_DEBUG // define this to use scheduler debug[] values. Undefined by default for performance reasons
 #define DEBUG_MODE DEBUG_NONE // change this to change initial debug mode
 
+// Uncomment to enable serial debugging
+//#define USE_DEBUG_SERIAL
+
 #define I2C1_OVERCLOCK true
 #define I2C2_OVERCLOCK true
 
@@ -106,6 +109,7 @@
 #define USE_SERIALRX_SUMD       // Graupner Hott protocol
 #define USE_SERIALRX_SUMH       // Graupner legacy protocol
 #define USE_SERIALRX_XBUS       // JR
+#define USE_WATCHDOGS
 
 #if (FLASH_SIZE > 64)
 #define MAX_PROFILE_COUNT 3

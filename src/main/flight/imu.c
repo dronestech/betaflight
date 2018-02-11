@@ -68,6 +68,10 @@ static bool imuUpdated = false;
 
 #endif
 
+#ifdef USE_WATCHDOGS
+#include "watchdogs/watchdogs.h"
+#endif //USE_WATCHDOGS
+
 // the limit (in degrees/second) beyond which we stop integrating
 // omega_I. At larger spin rates the DCM PI controller can get 'dizzy'
 // which results in false gyro drift. See
@@ -455,6 +459,14 @@ static void imuCalculateEstimatedAttitude(timeUs_t currentTimeUs)
                         useYaw, rawYawError);
 
     imuUpdateEulerAngles();
+
+#ifdef USE_WATCHDOGS
+    watchdogsHandleAttitude(
+        DECIDEGREES_TO_DEGREES(attitude.values.roll), 
+        DECIDEGREES_TO_DEGREES(attitude.values.pitch), 
+        DECIDEGREES_TO_DEGREES(attitude.values.yaw));
+#endif //USE_WATCHDOGS
+
 #endif
 #if defined(USE_ALT_HOLD)
     imuCalculateAcceleration(deltaT); // rotate acc vector into earth frame

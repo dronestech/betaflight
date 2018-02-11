@@ -121,6 +121,9 @@
 #define PG_TRICOPTER_CONFIG 528
 #define PG_BETAFLIGHT_END 528
 
+// Watchdogs
+#define PG_WATCHDOGS_CONFIG 600
+
 
 // OSD configuration (subject to change)
 #define PG_OSD_FONT_CONFIG 2047
