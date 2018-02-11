@@ -272,6 +272,12 @@ static const char * const lookupTableRatesType[] = {
     "BETAFLIGHT", "RACEFLIGHT"
 };
 
+#ifdef USE_WATCHDOGS
+static const char * const lookupTableWatchdogsTargets[] = {
+    "NONE", "ROLL", "PITCH", "ROLLPITCH"
+};
+#endif
+
 const lookupTableEntry_t lookupTables[] = {
     { lookupTableOffOn, sizeof(lookupTableOffOn) / sizeof(char *) },
     { lookupTableUnit, sizeof(lookupTableUnit) / sizeof(char *) },
@@ -324,6 +330,9 @@ const lookupTableEntry_t lookupTables[] = {
     { lookupTableGyroOverflowCheck, sizeof(lookupTableGyroOverflowCheck) / sizeof(char *) },
 #endif
     { lookupTableRatesType, sizeof(lookupTableRatesType) / sizeof(char *) },
+#ifdef USE_WATCHDOGS
+    { lookupTableWatchdogsTargets, sizeof(lookupTableWatchdogsTargets) / sizeof(char *) },
+#endif
 };
 
 const clivalue_t valueTable[] = {
@@ -864,7 +873,7 @@ const clivalue_t valueTable[] = {
 #endif
 
 #ifdef USE_WATCHDOGS
-    { "wds_targets", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 3 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, enabled_watchdogs) },
+    { "wds_targets", VAR_UINT8 | MASTER_VALUE | MODE_LOOKUP, .config.minmax = { TABLE_WATCHDOGS_TARGETS }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, enabled_watchdogs) },
     { "wds_maxroll", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxRoll) },
     { "wds_maxpitch", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxPitch) },
 #endif

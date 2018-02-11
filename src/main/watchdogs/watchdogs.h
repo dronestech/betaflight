@@ -7,6 +7,7 @@ typedef enum {
     WATCHDOG_NONE = 0x00,
     WATCHDOG_ROLL = 0x01,
     WATCHDOG_PITCH = 0x02,
+    WATCHDOG_ROLLPITCH = 0x03,
 } watchdogs_e;
 
 typedef struct watchdogsConfig_d {
