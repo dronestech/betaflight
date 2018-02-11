@@ -92,6 +92,8 @@
 #include "telemetry/ibus_shared.h"
 #include "telemetry/telemetry.h"
 
+#include "watchdogs/watchdogs.h"
+
 // Sensor names (used in lookup tables for *_hardware settings and in status command output)
 // sync with accelerationSensor_e
 const char * const lookupTableAccHardware[] = {
@@ -299,6 +301,12 @@ static const char * const lookupOverclock[] = {
     };
 #endif
 
+#ifdef USE_WATCHDOGS
+static const char * const lookupTableWatchdogsTargets[] = {
+    "NONE", "ROLL", "PITCH", "ROLLPITCH"
+};
+#endif
+
 const lookupTableEntry_t lookupTables[] = {
     { lookupTableOffOn, sizeof(lookupTableOffOn) / sizeof(char *) },
     { lookupTableUnit, sizeof(lookupTableUnit) / sizeof(char *) },
@@ -359,6 +367,9 @@ const lookupTableEntry_t lookupTables[] = {
 #endif
 #ifdef USE_DUAL_GYRO
     { lookupTableGyro, sizeof(lookupTableGyro) / sizeof(char *) },
+#endif
+#ifdef USE_WATCHDOGS
+    { lookupTableWatchdogsTargets, sizeof(lookupTableWatchdogsTargets) / sizeof(char *) },
 #endif
 };
 
@@ -910,6 +921,12 @@ const clivalue_t valueTable[] = {
 #ifdef USE_PINIOBOX
     { "pinio_box", VAR_UINT8 | MASTER_VALUE | MODE_ARRAY, .config.array.length = PINIO_COUNT, PG_PINIOBOX_CONFIG, offsetof(pinioBoxConfig_t, permanentId) },
 #endif
+#endif
+
+#ifdef USE_WATCHDOGS
+    { "wds_targets", VAR_UINT8 | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_WATCHDOGS_TARGETS }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, enabled_watchdogs) },
+    { "wds_maxroll", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxRoll) },
+    { "wds_maxpitch", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxPitch) },
 #endif
 };
 

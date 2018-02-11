@@ -83,6 +83,9 @@ typedef enum {
 #ifdef USE_DUAL_GYRO
     TABLE_GYRO,
 #endif
+#ifdef USE_WATCHDOGS
+    TABLE_WATCHDOGS_TARGETS,
+#endif
     LOOKUP_TABLE_COUNT
 } lookupTableIndex_e;
 
