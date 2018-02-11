@@ -5,7 +5,6 @@
 #include "pg/pg_ids.h"
 #include "fc/fc_core.h"
 #include "io/serial.h"
-#include "io/debugserial.h"
 #include "watchdogs/watchdogs.h"
 
 PG_REGISTER_WITH_RESET_TEMPLATE(watchdogsConfig_t, watchdogsConfig, PG_WATCHDOGS_CONFIG, 0);

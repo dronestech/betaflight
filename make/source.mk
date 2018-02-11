@@ -189,8 +189,7 @@ FC_SRC = \
             io/vtx_smartaudio.c \
             io/vtx_tramp.c \
             io/vtx_control.c \
-            io/debugserial.c \
-            watchdogs/watchdogs.c \
+            watchdogs/watchdogs.c
 
 COMMON_DEVICE_SRC = \
             $(CMSIS_SRC) \
