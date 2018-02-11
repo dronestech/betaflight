@@ -136,7 +136,6 @@
 #define SPI4_MOSI_PIN           PE6
 
 
-#define USE_OSD
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE    SPI2
 #define MAX7456_SPI_CS_PIN      SPI2_NSS_PIN
@@ -178,7 +177,7 @@
 #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
 
 #define USE_ADC
-#define ADC_INSTANCE            ADC2
+#define ADC_INSTANCE            ADC1
 #define CURRENT_METER_ADC_PIN   PC2
 #define VBAT_ADC_PIN            PC3
 #define RSSI_ADC_PIN            PC5

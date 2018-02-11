@@ -26,12 +26,10 @@
 #else
 #define TARGET_BOARD_IDENTIFIER "SRFM"
 
+#undef USE_OSD
 #ifndef SPRACINGF3MINI_REV
 #define SPRACINGF3MINI_REV 2
 #endif
-
-// Space reduction measures to make the firmware fit into flash:
-#undef USE_RCDEVICE
 
 #define CONFIG_FASTLOOP_PREFERRED_ACC ACC_NONE
 

@@ -38,11 +38,6 @@
 
 #endif // SPRACINGF3MQ
 
-// Space reduction measures to make the firmware fit into flash:
-#undef USE_TELEMETRY_JETIEXBUS
-#undef USE_SERIALRX_JETIEXBUS
-#undef USE_TELEMETRY_MAVLINK
-
 
 #define CONFIG_FASTLOOP_PREFERRED_ACC ACC_DEFAULT
 
@@ -79,7 +74,7 @@
 #define USE_MAG_AK8963
 //#define USE_MAG_HMC5883 // External
 
-#define MAG_AK8963_ALIGN CW90_DEG_FLIP
+#define MAG_AK8963_ALIGN CW270_DEG_FLIP
 
 //#define USE_RANGEFINDER
 //#define USE_RANGEFINDER_HCSR04
@@ -163,7 +158,6 @@
 #define CURRENT_METER_ADC_PIN   PA5
 #endif
 
-#define USE_OSD
 #define DISABLE_EXTENDED_CMS_OSD_MENU
 #define USE_OSD_OVER_MSP_DISPLAYPORT
 #define USE_MSP_CURRENT_METER

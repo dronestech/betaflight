@@ -143,8 +143,6 @@
 #define USE_RTC6705_CLK_HACK
 #define RTC6705_CLK_PIN                     SPI3_SCK_PIN
 
-#define USE_OSD
-
 // Bus Switched Device, Device A.
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE                SPI3
@@ -210,10 +208,6 @@
 
 // FIXME While it's possible to use the button on the OSD/VTX board for binding enabling it here will break binding unless you have the OSD/VTX connected.
 //#define BINDPLUG_PIN                        BUTTON_A_PIN
-
-// Temporarily disable SMARTAUDIO and TRAMP VTX support due to flash size issues.
-#undef USE_VTX_SMARTAUDIO
-#undef USE_VTX_TRAMP
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
 
