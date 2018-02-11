@@ -123,6 +123,15 @@
 #define PG_PINIOBOX_CONFIG 530
 #define PG_BETAFLIGHT_END 530
 
+// Watchdogs
+#define PG_WATCHDOGS_CONFIG 600
+
+// Watchdogs
+#define PG_WATCHDOGS_CONFIG 600
+
+// Watchdogs
+#define PG_WATCHDOGS_CONFIG 600
+
 
 // OSD configuration (subject to change)
 #define PG_OSD_FONT_CONFIG 2047

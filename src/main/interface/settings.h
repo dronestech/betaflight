@@ -77,6 +77,9 @@ typedef enum {
 #ifdef USE_OVERCLOCK
     TABLE_OVERCLOCK,
 #endif
+#ifdef USE_WATCHDOGS
+    TABLE_WATCHDOGS_TARGETS,
+#endif
     LOOKUP_TABLE_COUNT
 } lookupTableIndex_e;
 
