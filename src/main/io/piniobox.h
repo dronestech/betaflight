@@ -15,14 +15,7 @@
  * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "pg/piniobox.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#define EEPROM_CONF_VERSION 168
-
-bool isEEPROMContentValid(void);
-bool loadEEPROM(void);
-void writeConfigToEEPROM(void);
-uint16_t getEEPROMConfigSize(void);
+void pinioBoxInit(const pinioBoxConfig_t *pinioBoxConfig);
+void pinioBoxUpdate(timeUs_t currentTimeUs);

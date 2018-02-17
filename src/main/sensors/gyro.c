@@ -138,7 +138,7 @@ STATIC_UNIT_TESTED gyroDev_t * const gyroDevPtr = &gyroSensor1.gyroDev;
 #if defined(USE_GYRO_FAST_KALMAN)
 static void gyroInitFilterKalman(gyroSensor_t *gyroSensor, uint16_t gyro_filter_q, uint16_t gyro_filter_r, uint16_t gyro_filter_p);
 #elif defined (USE_GYRO_BIQUAD_RC_FIR2)
-static void gyroInitFilterBiquadRCFIR2(gyroSensor_t *gyroSensor, uint16_t gyro_filter_q, uint16_t gyro_filter_r);
+static void gyroInitFilterBiquadRCFIR2(gyroSensor_t *gyroSensor, uint16_t lpfHz);
 #endif
 static void gyroInitSensorFilters(gyroSensor_t *gyroSensor);
 
@@ -152,6 +152,9 @@ static void gyroInitSensorFilters(gyroSensor_t *gyroSensor);
 #else
 #define GYRO_SYNC_DENOM_DEFAULT 4
 #endif
+
+#define GYRO_OVERFLOW_TRIGGER_THRESHOLD 31980  // 97.5% full scale (1950dps)
+#define GYRO_OVERFLOW_RESET_THRESHOLD 30340    // 92.5% full scale (1850dps)
 
 PG_REGISTER_WITH_RESET_TEMPLATE(gyroConfig_t, gyroConfig, PG_GYRO_CONFIG, 1);
 
@@ -170,6 +173,7 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
     .gyro_soft_notch_hz_2 = 200,
     .gyro_soft_notch_cutoff_2 = 100,
     .checkOverflow = GYRO_OVERFLOW_CHECK_ALL_AXES,
+    .gyro_soft_lpf_hz_2 = 0,
     .gyro_filter_q = 0,
     .gyro_filter_r = 0,
     .gyro_filter_p = 0,
@@ -574,15 +578,15 @@ static void gyroInitFilterKalman(gyroSensor_t *gyroSensor, uint16_t gyro_filter_
     }
 }
 #elif defined(USE_GYRO_BIQUAD_RC_FIR2)
-static void gyroInitFilterBiquadRCFIR2(gyroSensor_t *gyroSensor, uint16_t gyro_filter_q, uint16_t gyro_filter_r)
+static void gyroInitFilterBiquadRCFIR2(gyroSensor_t *gyroSensor, uint16_t lpfHz)
 {
     gyroSensor->biquadRCFIR2ApplyFn = nullFilterApply;
-
-    // If the biquad RC+FIR2 Kalman-esque Process and Measurement noise covariances are non-zero, we treat as enabled
-    if (gyro_filter_q != 0 && gyro_filter_r != 0) {
+    const uint32_t gyroFrequencyNyquist = 1000000 / 2 / gyro.targetLooptime;
+    const float gyroDt = (float) gyro.targetLooptime * 0.000001f;
+    if (lpfHz && lpfHz <= gyroFrequencyNyquist) {  // Initialisation needs to happen once samplingrate is known
         gyroSensor->biquadRCFIR2ApplyFn = (filterApplyFnPtr)biquadFilterApply;
         for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
-            biquadRCFIR2FilterInit(&gyroSensor->biquadRCFIR2[axis], gyro_filter_q, gyro_filter_r);
+            biquadRCFIR2FilterInit(&gyroSensor->biquadRCFIR2[axis], lpfHz, gyroDt);
         }
     }
 }
@@ -596,7 +600,7 @@ static void gyroInitSensorFilters(gyroSensor_t *gyroSensor)
 #if defined(USE_GYRO_FAST_KALMAN)
     gyroInitFilterKalman(gyroSensor, gyroConfig()->gyro_filter_q, gyroConfig()->gyro_filter_r, gyroConfig()->gyro_filter_p);
 #elif defined(USE_GYRO_BIQUAD_RC_FIR2)
-    gyroInitFilterBiquadRCFIR2(gyroSensor, gyroConfig()->gyro_filter_q, gyroConfig()->gyro_filter_r);
+    gyroInitFilterBiquadRCFIR2(gyroSensor, gyroConfig()->gyro_soft_lpf_hz_2);
 #endif
     gyroInitFilterLpf(gyroSensor, gyroConfig()->gyro_soft_lpf_hz);
     gyroInitFilterNotch1(gyroSensor, gyroConfig()->gyro_soft_notch_hz_1, gyroConfig()->gyro_soft_notch_cutoff_1);
@@ -727,13 +731,9 @@ static void checkForOverflow(gyroSensor_t *gyroSensor, timeUs_t currentTimeUs)
     // This can cause an overflow and sign reversal in the output.
     // Overflow and sign reversal seems to result in a gyro value of +1996 or -1996.
     if (gyroSensor->overflowDetected) {
-        const float gyroRateX = gyroSensor->gyroDev.gyroADC[X] * gyroSensor->gyroDev.scale;
-        const float gyroRateY = gyroSensor->gyroDev.gyroADC[Y] * gyroSensor->gyroDev.scale;
-        const float gyroRateZ = gyroSensor->gyroDev.gyroADC[Z] * gyroSensor->gyroDev.scale;
-        static const int overflowResetThreshold = 1800;
-        if (abs(gyroRateX) < overflowResetThreshold
-              && abs(gyroRateY) < overflowResetThreshold
-              && abs(gyroRateZ) < overflowResetThreshold) {
+        if (abs(gyroSensor->gyroDev.gyroADC[X]) < GYRO_OVERFLOW_RESET_THRESHOLD
+              && abs(gyroSensor->gyroDev.gyroADC[Y]) < GYRO_OVERFLOW_RESET_THRESHOLD
+              && abs(gyroSensor->gyroDev.gyroADC[Z]) < GYRO_OVERFLOW_RESET_THRESHOLD) {
             // if we have 50ms of consecutive OK gyro vales, then assume yaw readings are OK again and reset overflowDetected
             // reset requires good OK values on all axes
             if (cmpTimeUs(currentTimeUs, gyroSensor->overflowTimeUs) > 50000) {
@@ -743,14 +743,25 @@ static void checkForOverflow(gyroSensor_t *gyroSensor, timeUs_t currentTimeUs)
             // not a consecutive OK value, so reset the overflow time
             gyroSensor->overflowTimeUs = currentTimeUs;
         }
-    }
+    } else {
 #ifndef SIMULATOR_BUILD
-    // check for overflow in the axes set in overflowAxisMask
-    if (mpuGyroCheckOverflow(&gyroSensor->gyroDev) & overflowAxisMask) {
-        gyroSensor->overflowDetected = true;
-        gyroSensor->overflowTimeUs = currentTimeUs;
-    }
+        // check for overflow in the axes set in overflowAxisMask
+        gyroOverflow_e overflowCheck = GYRO_OVERFLOW_NONE;
+        if (abs(gyroSensor->gyroDev.gyroADC[X]) > GYRO_OVERFLOW_TRIGGER_THRESHOLD) {
+            overflowCheck |= GYRO_OVERFLOW_X;
+        }
+        if (abs(gyroSensor->gyroDev.gyroADC[Y]) > GYRO_OVERFLOW_TRIGGER_THRESHOLD) {
+            overflowCheck |= GYRO_OVERFLOW_Y;
+        }
+        if (abs(gyroSensor->gyroDev.gyroADC[Z]) > GYRO_OVERFLOW_TRIGGER_THRESHOLD) {
+            overflowCheck |= GYRO_OVERFLOW_Z;
+        }
+        if (overflowCheck & overflowAxisMask) {
+            gyroSensor->overflowDetected = true;
+            gyroSensor->overflowTimeUs = currentTimeUs;
+        }
 #endif // SIMULATOR_BUILD
+    }
 #else
     UNUSED(gyroSensor);
     UNUSED(currentTimeUs);
@@ -798,9 +809,6 @@ static FAST_CODE void gyroUpdateSensor(gyroSensor_t *gyroSensor, timeUs_t curren
     accumulationLastTimeSampledUs = currentTimeUs;
     accumulatedMeasurementTimeUs += sampleDeltaUs;
 
-    if (gyroConfig()->checkOverflow) {
-        checkForOverflow(gyroSensor, currentTimeUs);
-    }
     if (gyroDebugMode == DEBUG_NONE) {
         for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
             // NOTE: this branch optimized for when there is no gyro debugging, ensure it is kept in step with non-optimized branch
@@ -867,6 +875,9 @@ static FAST_CODE void gyroUpdateSensor(gyroSensor_t *gyroSensor, timeUs_t curren
                 gyroPrevious[axis] = gyroADCf;
             }
         }
+    }
+    if (gyroConfig()->checkOverflow) {
+        checkForOverflow(gyroSensor, currentTimeUs);
     }
 }
 
