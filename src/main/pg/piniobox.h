@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "drivers/pinio.h"
+#include "fc/rc_modes.h"
+#include "pg/pg.h"
 
-#define EEPROM_CONF_VERSION 168
+typedef struct pinioBoxConfig_s {
+    uint8_t permanentId[PINIO_COUNT];
+} pinioBoxConfig_t;
 
-bool isEEPROMContentValid(void);
-bool loadEEPROM(void);
-void writeConfigToEEPROM(void);
-uint16_t getEEPROMConfigSize(void);
+PG_DECLARE(pinioBoxConfig_t, pinioBoxConfig);

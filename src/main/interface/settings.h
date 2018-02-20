@@ -74,6 +74,9 @@ typedef enum {
     TABLE_GYRO_OVERFLOW_CHECK,
 #endif
     TABLE_RATES_TYPE,
+#ifdef USE_OVERCLOCK
+    TABLE_OVERCLOCK,
+#endif
 #ifdef USE_WATCHDOGS
     TABLE_WATCHDOGS_TARGETS,
 #endif
