@@ -895,6 +895,12 @@ const clivalue_t valueTable[] = {
 #ifdef USE_RANGEFINDER
     { "rangefinder_hardware", VAR_UINT8 | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RANGEFINDER_HARDWARE }, PG_RANGEFINDER_CONFIG, offsetof(rangefinderConfig_t, rangefinder_hardware) },
 #endif
+  
+#ifdef USE_WATCHDOGS
+    { "wds_targets", VAR_UINT8 | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_WATCHDOGS_TARGETS }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, enabled_watchdogs) },
+    { "wds_maxroll", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxRoll) },
+    { "wds_maxpitch", VAR_UINT8 | MASTER_VALUE , .config.minmax = { 0, 80 }, PG_WATCHDOGS_CONFIG, offsetof(watchdogsConfig_t, maxPitch) },
+#endif
 
 // PG_PINIO_CONFIG
 #ifdef USE_PINIO
