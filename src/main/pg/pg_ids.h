@@ -126,13 +126,6 @@
 // Watchdogs
 #define PG_WATCHDOGS_CONFIG 600
 
-// Watchdogs
-#define PG_WATCHDOGS_CONFIG 600
-
-// Watchdogs
-#define PG_WATCHDOGS_CONFIG 600
-
-
 // OSD configuration (subject to change)
 #define PG_OSD_FONT_CONFIG 2047
 #define PG_OSD_VIDEO_CONFIG 2046
